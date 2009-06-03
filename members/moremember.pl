@@ -208,6 +208,18 @@ $data->{'branchname'} = $branchdetail->{branchname};
 
 
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
+# Separate total amount owed into static and accruing portions
+my ($amountpastdue,$amountaccruing) = 0.0;
+if (C4::Context->preference("EnableOverdueAccruedAmount")) {
+  foreach my $acctline (@$accts) {
+    if (defined($acctline->{'itemnumber'}) && ($acctline->{'accounttype'} eq 'FU')) {
+      $amountaccruing += $acctline->{'amountoutstanding'};
+    }
+    else {
+      $amountpastdue += $acctline->{'amountoutstanding'};
+    }
+  }
+}
 my $lib1 = &GetSortDetails( "Bsort1", $data->{'sort1'} );
 my $lib2 = &GetSortDetails( "Bsort2", $data->{'sort2'} );
 $template->param( lib1 => $lib1 ) if ($lib1);
@@ -408,29 +420,33 @@ if (C4::Context->preference('EnhancedMessagingPreferences')) {
 $template->param(
     detailview => 1,
     AllowRenewalLimitOverride => C4::Context->preference("AllowRenewalLimitOverride"),
-    DHTMLcalendar_dateformat => C4::Dates->DHTMLcalendar(),
     CANDELETEUSER    => $candeleteuser,
-    roaddetails     => $roaddetails,
-    borrowernumber  => $borrowernumber,
-    categoryname    => $data->{'description'},
     dispreturn      => C4::Context->preference('PatronDisplayReturn'),
-    reregistration  => $reregistration,
-    branch          => $branch,
-    totalprice      => sprintf("%.2f", $totalprice),
-    totaldue        => sprintf("%.2f", $total),
     totaldue_raw    => $total,
-    issueloop       => \@issuedata,
 	issuecount => $issuecount,
-    overdues_exist  => $overdues_exist,
-    error           => $error,
-    $error          => 1,
-    StaffMember     => ($category_type eq 'S'),
-    is_child        => ($category_type eq 'C'),
-#   reserveloop     => \@reservedata,
-    dateformat      => C4::Context->preference("dateformat"),
-    "dateformat_" . (C4::Context->preference("dateformat") || '') => 1,
-    samebranch     => $samebranch,
     quickslip		  => $quickslip,
+    EnableOverdueAccruedAmount => C4::Context->preference("EnableOverdueAccruedAmount"),
+    DHTMLcalendar_dateformat=>C4::Dates->DHTMLcalendar(),
+    roaddetails      => $roaddetails,
+    borrowernumber   => $borrowernumber,
+    categoryname     => $data->{'description'},
+    reregistration   => $reregistration,
+    branch	     => $branch,	
+    totalprice       => sprintf( "%.2f", $totalprice ),
+    totaldue         => sprintf( "%.2f", $total ),
+    amountaccruing   => sprintf( "%.2f", $amountaccruing),
+    amountpastdue    => sprintf( "%.2f", $amountpastdue),
+    issueloop        => \@issuedata,
+    overdues_exist   => $overdues_exist,
+    unvalidlibrarian => $unvalidlibrarian,
+    error            => $error,
+    $error           => 1,
+    StaffMember	     => ($category_type eq 'S'),
+    is_child         => ($category_type eq 'C'),
+#   reserveloop      => \@reservedata,
+    dateformat       => C4::Context->preference("dateformat"),
+    "dateformat_" . (C4::Context->preference("dateformat") || '') => 1,
+    samebranch       => $samebranch,
 );
 
 output_html_with_http_headers $input, $cookie, $template->output;

@@ -57,7 +57,7 @@ our %item_db = (
             rtimestamp => '2008-10-09 11:15:06',
             biblionumber => '406',
             borrowernumber => '756',
-            branchcode => 'CPL'
+            branchcode => 'BHPL'
             }
         ],
     },

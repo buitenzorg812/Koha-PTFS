@@ -110,7 +110,14 @@ sub new {
 
     # FIXME: populate fine_items recall_items
 #   $ilspatron{hold_items}    = (GetReservesFromBorrowernumber($kp->{borrowernumber},'F'));
-	$ilspatron{unavail_holds} = [(GetReservesFromBorrowernumber($kp->{borrowernumber}))];
+
+    my @reserves =GetReservesFromBorrowernumber($kp->{borrowernumber});
+    for my $r (@reserves) {
+        if ( $r->{found} ) { # value is set to W or F
+            next; # filter out available (waiting or found) holds
+        }
+        push @{ $ilspatron{unavail_holds} }, $r;
+    }
 	$ilspatron{items} = GetPendingIssues($kp->{borrowernumber});
 	$self = \%ilspatron;
 	$debug and warn Dumper($self);

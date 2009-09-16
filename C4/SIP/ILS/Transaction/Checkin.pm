@@ -14,6 +14,7 @@ use ILS::Transaction;
 
 use C4::Circulation;
 use C4::Debug;
+use C4::Reserves;
 
 our @ISA = qw(ILS::Transaction);
 
@@ -76,7 +77,16 @@ sub do_checkin {
     if ($messages->{ResFound}) {
         $self->hold($messages->{ResFound});
         $debug and warn "Item returned at $branch reserved at $messages->{ResFound}->{branchcode}";
-        $self->alert_type(($branch eq $messages->{ResFound}->{branchcode}) ? '01' : '02');
+        my $do_transfer;
+        if ($branch eq $messages->{ResFound}->{branchcode}) {
+            $self->alert_type('01');
+        } else {
+            $self->alert_type('02');
+            $do_transfer = 1;
+        }
+        C4::Reserves::ModReserveAffect($messages->{ResFound}->{itemnumber},
+            $messages->{ResFound}->{borrowernumber},
+            $do_transfer);
     }
     $self->alert(1) if defined $self->alert_type;  # alert_type could be "00", hypothetically
     $self->ok($return);

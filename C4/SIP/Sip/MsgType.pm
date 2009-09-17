@@ -946,7 +946,8 @@ sub handle_patron_info {
 	$resp .= add_count('patron_info/unavail_holds',
 			   scalar @{$patron->unavail_holds});
 
-    # FID_INST_ID added last (order irrelevant for fields w/ identifiers)
+    # (order irrelevant for fields w/ identifiers)
+    $resp .= add_field(FID_INST_ID,       ($ils->institution_id || 'SIP2'));
 
 	# while the patron ID we got from the SC is valid, let's
 	# use the one returned from the ILS, just in case...
@@ -1008,7 +1009,6 @@ sub handle_patron_info {
         }
     }
 
-    $resp .= add_field(FID_INST_ID,       ($ils->institution_id || 'SIP2'));
     $self->write_msg($resp);
     return(PATRON_INFO);
 }

@@ -18,6 +18,7 @@ use Sip::Checksum qw(verify_cksum);
 use Data::Dumper;
 use CGI;
 use C4::Auth qw(&check_api_auth);
+use C4::Items qw(GetItem);
 
 use UNIVERSAL qw(can);	# make sure this is *after* C4 modules.
 
@@ -904,6 +905,10 @@ sub summary_info {
 
     syslog("LOG_DEBUG", "summary_info: list = (%s)", join(", ", @{$itemlist}));
     foreach my $i (@{$itemlist}) {
+        if (! $i->{barcode}  && $i->{itemnumber} ) {
+            my $item = GetItem($i->{itemnumber});
+            $i->{barcode} = $item->{barcode};
+        }
         $resp .= add_field($fid, $i->{barcode});
     }
 

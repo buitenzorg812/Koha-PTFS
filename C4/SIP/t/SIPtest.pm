@@ -75,7 +75,7 @@ our $user_fullname= 'David Birmingham';
 our $user_homeaddr= '2562 W\. Boss Arnold Road';
 our $user_email   = 'dbirmingham\@ptfs\.com';
 our $user_phone   = '\(301\) 834-5308';
-our $user_birthday= '1970-06-03';
+our $user_birthday= '19700603';
 our $user_ptype   = 'ADULT';
 our $user_inet    = 'Y';
 
@@ -86,7 +86,7 @@ our $user2_fullname= 'Alison Birmingham';
 our $user2_homeaddr= '2562 W\. Boss Arnold Road';
 our $user2_email   = 'dbirmingham\@ptfs\.com';
 our $user2_phone   = '\(301\) 834-5308';
-our $user2_birthday= '1967-11-23';
+our $user2_birthday= '19671123';
 our $user2_ptype   = 'ADULT';
 our $user2_inet    = 'Y';
 

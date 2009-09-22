@@ -909,9 +909,7 @@ sub summary_info {
             my $item = GetItem($i->{itemnumber});
             $i->{barcode} = $item->{barcode};
         }
-        elsif (defined($i->{biblionumber})) {
-          $i->{barcode} = $i->{biblionumber};
-        }
+        $i->{barcode} = $i->{biblionumber} if (! $i->{barcode} && $i->{biblionumber});
         $resp .= add_field($fid, $i->{barcode});
     }
 

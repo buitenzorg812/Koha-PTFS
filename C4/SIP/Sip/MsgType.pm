@@ -909,6 +909,9 @@ sub summary_info {
             my $item = GetItem($i->{itemnumber});
             $i->{barcode} = $item->{barcode};
         }
+        elsif (defined($i->{biblionumber})) {
+          $i->{barcode} = $i->{biblionumber};
+        }
         $resp .= add_field($fid, $i->{barcode});
     }
 
@@ -1129,7 +1132,8 @@ sub handle_item_information {
 	    $resp .= add_field(FID_HOLD_QUEUE_LEN, $i);
 	}
 	if (($i = $item->due_date) != 0) {
-	    $resp .= add_field(FID_DUE_DATE, Sip::timestamp($i));
+            $i .= "    000000";
+	    $resp .= add_field(FID_DUE_DATE, $i);
 	}
 	if (($i = $item->recall_date) != 0) {
 	    $resp .= add_field(FID_RECALL_DATE, Sip::timestamp($i));

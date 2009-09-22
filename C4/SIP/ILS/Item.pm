@@ -93,6 +93,11 @@ sub new {
     $item->{permanent_location}= $item->{homebranch};
     $item->{'collection_code'} = $item->{ccode};
     $item->{  'call_number'  } = $item->{itemcallnumber};
+    if (defined($item->{onloan})) {
+      $item->{   'due_date'    } = $item->{onloan};
+      $item->{   'due_date'    } =~ s/-//g;
+    }
+    $item->{'current_location'} = $item->{holdingbranch};
     # $item->{'destination_loc'}  =  ?
 
 	# check if its on issue and if so get the borrower

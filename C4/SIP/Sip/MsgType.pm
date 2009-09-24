@@ -18,7 +18,7 @@ use Sip::Checksum qw(verify_cksum);
 use Data::Dumper;
 use CGI;
 use C4::Auth qw(&check_api_auth);
-use C4::Items qw(GetItem);
+use C4::Items qw(GetItem GetItemsInfo);
 
 use UNIVERSAL qw(can);	# make sure this is *after* C4 modules.
 
@@ -909,7 +909,9 @@ sub summary_info {
             my $item = GetItem($i->{itemnumber});
             $i->{barcode} = $item->{barcode};
         }
-        $i->{barcode} = $i->{biblionumber} if (! $i->{barcode} && $i->{biblionumber});
+        # If item is still not attached, grab a placeholder barcode
+        my @items = GetItemsInfo($i->{biblionumber},'intra');
+        $i->{barcode} = $items[0]->{barcode};
         $resp .= add_field($fid, $i->{barcode});
     }
 

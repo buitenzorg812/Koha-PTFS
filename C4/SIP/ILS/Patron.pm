@@ -21,6 +21,7 @@ use C4::Context;
 use C4::Koha;
 use C4::Members;
 use C4::Reserves;
+use C4::Items qw(GetItemsInfo);
 use C4::Branch qw(GetBranchName);
 use Digest::MD5 qw(md5_base64);
 
@@ -116,6 +117,13 @@ sub new {
         if ( $r->{found} ) { # value is set to W or F
             next; # filter out available (waiting or found) holds
         }
+        my @items = GetItemsInfo($r->{biblionumber},'intra');
+        foreach my $item (@items) {
+          $r->{item_id} = $item->{barcode}
+            if ((defined($r->{itemnumber})) &&
+                ($item->{itemnumber} eq $r->{itemnumber}));
+        }
+        $r->{item_id} = $items[0]->{barcode} if (!$r->{item_id});
         push @{ $ilspatron{unavail_holds} }, $r;
     }
 	$ilspatron{items} = GetPendingIssues($kp->{borrowernumber});

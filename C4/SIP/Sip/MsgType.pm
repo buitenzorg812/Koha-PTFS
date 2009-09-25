@@ -1290,7 +1290,12 @@ sub handle_hold {
     }
 
     $resp .= $status->ok;
-    $resp .= sipbool($status->item  &&  $status->item->available($patron_id));
+    if ($hold_mode eq '-') {
+      $resp .= sipbool($status->item);
+    }
+    else {
+      $resp .= sipbool($status->item  &&  $status->item->available($patron_id));
+    }
     $resp .= Sip::timestamp;
 
     if ($status->ok) {
@@ -1324,6 +1329,7 @@ sub handle_renew {
     my ($patron_id, $patron_pwd, $item_id, $title_id, $item_props, $fee_ack);
     my $fields = $self->{fields};
     my $status;
+    my $due_date;
     my ($patron, $item);
     my $resp = RENEW_RESP;
 
@@ -1365,7 +1371,8 @@ sub handle_renew {
 	$resp .= add_field(FID_PATRON_ID, $patron->id);
 	$resp .= add_field(FID_ITEM_ID,  $item->id);
 	$resp .= add_field(FID_TITLE_ID, $item->title_id);
-	$resp .= add_field(FID_DUE_DATE, Sip::timestamp($item->due_date));
+        $due_date = $item->due_date . "    000000";
+	$resp .= add_field(FID_DUE_DATE, $due_date);
 	if ($ils->supports('security inhibit')) {
 	    $resp .= add_field(FID_SECURITY_INHIBIT,
 			       $status->security_inhibit);

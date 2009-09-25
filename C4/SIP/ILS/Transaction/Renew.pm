@@ -36,6 +36,7 @@ sub do_renew_for ($$) {
 	my $self = shift;
 	my $borrower = shift;
 	my ($renewokay,$renewerror) = CanBookBeRenewed($borrower->{borrowernumber},$self->{item}->{itemnumber});
+        $renewerror .= "_renewals";
 	if ($renewokay){
 		my $datedue = AddIssue( $borrower, $self->{item}->id, undef, 0 );
 		$self->{due} = $datedue;

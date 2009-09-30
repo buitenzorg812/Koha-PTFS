@@ -911,7 +911,7 @@ sub summary_info {
         }
         # If item is still not attached, grab a placeholder barcode
         my @items = GetItemsInfo($i->{biblionumber},'intra');
-        $i->{barcode} = $items[0]->{barcode};
+        $i->{barcode} = $items[0]->{barcode} if (!$i->{barcode});
         $resp .= add_field($fid, $i->{barcode});
     }
 
@@ -1358,6 +1358,8 @@ sub handle_renew {
     $patron = $status->patron;
     $item   = $status->item;
 
+    my $tmpitem = GetItem($item->{itemnumber});
+    $tmpitem->{onloan} =~ s/-//g;
     if ($status->ok) {
 	$resp .= '1';
 	$resp .= $status->renewal_ok ? 'Y' : 'N';
@@ -1371,7 +1373,7 @@ sub handle_renew {
 	$resp .= add_field(FID_PATRON_ID, $patron->id);
 	$resp .= add_field(FID_ITEM_ID,  $item->id);
 	$resp .= add_field(FID_TITLE_ID, $item->title_id);
-        $due_date = $item->due_date . "    000000";
+        $due_date = $tmpitem->{onloan} . "    000000";
 	$resp .= add_field(FID_DUE_DATE, $due_date);
 	if ($ils->supports('security inhibit')) {
 	    $resp .= add_field(FID_SECURITY_INHIBIT,

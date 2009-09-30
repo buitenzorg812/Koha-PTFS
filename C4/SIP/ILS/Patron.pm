@@ -21,7 +21,7 @@ use C4::Context;
 use C4::Koha;
 use C4::Members;
 use C4::Reserves;
-use C4::Items qw(GetItemsInfo);
+use C4::Items qw(GetItem GetItemsInfo);
 use C4::Branch qw(GetBranchName);
 use Digest::MD5 qw(md5_base64);
 
@@ -226,18 +226,23 @@ sub language {
 # 
 sub drop_hold {
     my ($self, $item_id) = @_;
-	$item_id or return undef;
-	my $result = 0;
-	foreach (qw(hold_items unavail_holds)) {
-		$self->{$_} or next;
-		for (my $i = 0; $i < scalar @{$self->{$_}}; $i++) {
-			my $held_item = $self->{$_}[$i]->{item_id} or next;
-			if ($held_item eq $item_id) {
-				splice @{$self->{$_}}, $i, 1;
-				$result++;
-			}
-		}
-	}
+    $item_id or return undef;
+
+    my $result = 0;
+    foreach (qw(hold_items unavail_holds)) {
+      $self->{$_} or next;
+      for (my $i = 0; $i < scalar @{$self->{$_}}; $i++) {
+        if ($_ eq "hold_items") {
+          my $hold_item = GetItem($self->{$_}[$i]->{itemnumber});
+          $self->{$_}[$i]->{item_id} = $hold_item->{barcode}
+        }
+        my $held_item = $self->{$_}[$i]->{item_id} or next;
+        if ($held_item eq $item_id) {
+          splice @{$self->{$_}}, $i, 1;
+          $result++;
+        }
+      }
+    }
     return $result;
 }
 

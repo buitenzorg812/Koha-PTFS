@@ -116,6 +116,7 @@ warn 'found ' . scalar( @$upcoming_dues ) . ' issues' if $verbose;
 # for patrons wishing digests only.
 my $upcoming_digest;
 my $due_digest;
+my @Ttitems;
 
 UPCOMINGITEM: foreach my $upcoming ( @$upcoming_dues ) {
     warn 'examining ' . $upcoming->{'itemnumber'} . ' upcoming due items' if $verbose;
@@ -164,6 +165,11 @@ UPCOMINGITEM: foreach my $upcoming ( @$upcoming_dues ) {
                                       borrowernumber => $upcoming->{'borrowernumber'},
                                       branchcode    => $upcoming->{'branchcode'},
                                       biblionumber   => $biblio->{'biblionumber'} } );
+            $upcoming->{'title'} = $biblio->{'title'};
+            push @Ttitems,$upcoming;
+            if ($letter) {
+              C4::Letters::CreateTALKINGtechMESSAGE($upcoming->{'borrowernumber'},\@Ttitems,$letter_type,'0');
+            }
         }
     }
 
@@ -174,8 +180,8 @@ UPCOMINGITEM: foreach my $upcoming ( @$upcoming_dues ) {
                                           borrowernumber         => $upcoming->{'borrowernumber'},
                                           message_transport_type => $transport } );
         }
+
     }
-    
 }
 
 

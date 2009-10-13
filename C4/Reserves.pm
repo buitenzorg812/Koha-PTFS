@@ -1440,7 +1440,7 @@ sub _koha_notify_reserve {
     my @items;
     $item->{'title'} = $biblio->{'title'};
     push @items,$item;
-    C4::Letters::CreateTALKINGtechMESSAGE($borrowernumber,\@items,$messagingprefs->{'letter_code'},'1');
+    C4::Letters::CreateTALKINGtechMESSAGE($borrowernumber,\@items,$messagingprefs->{'letter_code'},'0');
 
 }
 

@@ -709,13 +709,25 @@ sub CreateTALKINGtechMESSAGE {
   my ($borrowernumber,$items,$code,$notelevel) = @_;
   my $borrower = C4::Members::GetMemberDetails($borrowernumber);
 
+  my %codemap = ( "ODUE" => "OVERDUE",
+                  "2WOD" => "OVERDUE",
+                  "BILLING" => "FINE",
+                  "Bill" => "FINE",
+                  "HOLD" => "RESERVE",
+                  "PREDUE" => "PREOVERDUE" );
+
+  $notelevel = 0 if ($codemap{$code} eq "FINE");
   my $due_date;
 # Append additional info into file that will be sent to i-tiva server
   open(MSG,">>/tmp/TtMESSAGE.csv") or warn "Can't open /tmp/TtMESSAGE.csv";
   foreach my $item (@$items) {
     # Reformat due date field for i-tiva, if applicable
     if (defined($item->{onloan})) {
-      my ($mm,$dd,$yyyy) = split(/-/,$item->{onloan});
+      my ($yyyy,$mm,$dd) = split(/-/,$item->{onloan});
+      $due_date = sprintf "%02d/%02d/%4d",$dd,$mm,$yyyy;
+    }
+    elsif (defined($item->{date_due})) {
+      my ($yyyy,$mm,$dd) = split(/-/,$item->{date_due});
       $due_date = sprintf "%02d/%02d/%4d",$dd,$mm,$yyyy;
     }
     else {
@@ -724,7 +736,7 @@ sub CreateTALKINGtechMESSAGE {
     my $branch = C4::Branch::GetBranchDetail($item->{holdingbranch});
     $branch->{branchname} =~ s/Public Library/PL/;
     printf MSG "\"V\",\"EN\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"\",\"%s\",\"%12.12s\",\"%s\",\"%s\",\"%s\",\"\"\r\n",
-    $code,$notelevel,$borrower->{cardnumber},$borrower->{title},
+    $codemap{$code},$notelevel,$borrower->{cardnumber},$borrower->{title},
     $borrower->{firstname},$borrower->{surname},$borrower->{phone},
     $borrower->{email},$item->{holdingbranch},$branch->{branchname},
     $item->{barcode},$due_date,$item->{title};

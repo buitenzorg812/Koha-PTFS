@@ -18,6 +18,7 @@ use Sip::Checksum qw(verify_cksum);
 use Data::Dumper;
 use CGI;
 use C4::Auth qw(&check_api_auth);
+use C4::Items qw(GetItem GetItemsInfo);
 
 use UNIVERSAL qw(can);	# make sure this is *after* C4 modules.
 
@@ -904,7 +905,14 @@ sub summary_info {
 
     syslog("LOG_DEBUG", "summary_info: list = (%s)", join(", ", @{$itemlist}));
     foreach my $i (@{$itemlist}) {
-        $resp .= add_field($fid, $i);
+        if (! $i->{barcode}  && $i->{itemnumber} ) {
+            my $item = GetItem($i->{itemnumber});
+            $i->{barcode} = $item->{barcode};
+        }
+        # If item is still not attached, grab a placeholder barcode
+        my @items = GetItemsInfo($i->{biblionumber},'intra');
+        $i->{barcode} = $items[0]->{barcode} if (!$i->{barcode});
+        $resp .= add_field($fid, $i->{barcode});
     }
 
     return $resp;
@@ -946,7 +954,8 @@ sub handle_patron_info {
 	$resp .= add_count('patron_info/unavail_holds',
 			   scalar @{$patron->unavail_holds});
 
-    # FID_INST_ID added last (order irrelevant for fields w/ identifiers)
+    # (order irrelevant for fields w/ identifiers)
+    $resp .= add_field(FID_INST_ID,       ($ils->institution_id || 'SIP2'));
 
 	# while the patron ID we got from the SC is valid, let's
 	# use the one returned from the ILS, just in case...
@@ -1008,7 +1017,6 @@ sub handle_patron_info {
         }
     }
 
-    $resp .= add_field(FID_INST_ID,       ($ils->institution_id || 'SIP2'));
     $self->write_msg($resp);
     return(PATRON_INFO);
 }
@@ -1124,7 +1132,8 @@ sub handle_item_information {
 	    $resp .= add_field(FID_HOLD_QUEUE_LEN, $i);
 	}
 	if (($i = $item->due_date) != 0) {
-	    $resp .= add_field(FID_DUE_DATE, Sip::timestamp($i));
+            $i .= "    000000";
+	    $resp .= add_field(FID_DUE_DATE, $i);
 	}
 	if (($i = $item->recall_date) != 0) {
 	    $resp .= add_field(FID_RECALL_DATE, Sip::timestamp($i));
@@ -1281,7 +1290,12 @@ sub handle_hold {
     }
 
     $resp .= $status->ok;
-    $resp .= sipbool($status->item  &&  $status->item->available($patron_id));
+    if ($hold_mode eq '-') {
+      $resp .= sipbool($status->item);
+    }
+    else {
+      $resp .= sipbool($status->item  &&  $status->item->available($patron_id));
+    }
     $resp .= Sip::timestamp;
 
     if ($status->ok) {
@@ -1315,6 +1329,7 @@ sub handle_renew {
     my ($patron_id, $patron_pwd, $item_id, $title_id, $item_props, $fee_ack);
     my $fields = $self->{fields};
     my $status;
+    my $due_date;
     my ($patron, $item);
     my $resp = RENEW_RESP;
 
@@ -1343,6 +1358,8 @@ sub handle_renew {
     $patron = $status->patron;
     $item   = $status->item;
 
+    my $tmpitem = GetItem($item->{itemnumber});
+    $tmpitem->{onloan} =~ s/-//g;
     if ($status->ok) {
 	$resp .= '1';
 	$resp .= $status->renewal_ok ? 'Y' : 'N';
@@ -1356,7 +1373,8 @@ sub handle_renew {
 	$resp .= add_field(FID_PATRON_ID, $patron->id);
 	$resp .= add_field(FID_ITEM_ID,  $item->id);
 	$resp .= add_field(FID_TITLE_ID, $item->title_id);
-	$resp .= add_field(FID_DUE_DATE, Sip::timestamp($item->due_date));
+        $due_date = $tmpitem->{onloan} . "    000000";
+	$resp .= add_field(FID_DUE_DATE, $due_date);
 	if ($ils->supports('security inhibit')) {
 	    $resp .= add_field(FID_SECURITY_INHIBIT,
 			       $status->security_inhibit);

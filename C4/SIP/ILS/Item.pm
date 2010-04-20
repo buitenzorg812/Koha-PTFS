@@ -57,7 +57,7 @@ our %item_db = (
             rtimestamp => '2008-10-09 11:15:06',
             biblionumber => '406',
             borrowernumber => '756',
-            branchcode => 'CPL'
+            branchcode => 'BHPL'
             }
         ],
     },
@@ -93,6 +93,11 @@ sub new {
     $item->{permanent_location}= $item->{homebranch};
     $item->{'collection_code'} = $item->{ccode};
     $item->{  'call_number'  } = $item->{itemcallnumber};
+    if (defined($item->{onloan})) {
+      $item->{   'due_date'    } = $item->{onloan};
+      $item->{   'due_date'    } =~ s/-//g;
+    }
+    $item->{'current_location'} = $item->{holdingbranch};
     # $item->{'destination_loc'}  =  ?
 
 	# check if its on issue and if so get the borrower
@@ -319,17 +324,17 @@ sub hold_pickup_date {
 # they should not be able to place a hold on an item they already have.
 
 sub available {
-	my ($self, $for_patron) = @_;
-	my $count  = (defined $self->{pending_queue}) ? scalar @{$self->{pending_queue}} : 0;
-	my $count2 = (defined $self->{hold_shelf}   ) ? scalar @{$self->{hold_shelf}   } : 0;
-	$debug and print STDERR "availability check: pending_queue size $count, hold_shelf size $count2\n";
-    if (defined($self->{patron_id})) {
-	 	($self->{patron_id} eq $for_patron) or return 0;
-		return ($count ? 0 : 1);
-	} else {	# not checked out
-        ($count2) and return $self->barcode_is_borrowernumber($for_patron, $self->{hold_shelf}[0]->{borrowernumber});
-	}
-	return 0;
+    my ($self, $for_patron) = @_;
+    my $count  = (defined $self->{pending_queue}) ? scalar @{$self->{pending_queue}} : 0;
+    my $count2 = (defined $self->{hold_shelf}   ) ? scalar @{$self->{hold_shelf}   } : 0;
+    $debug and print STDERR "availability check: pending_queue size $count, hold_shelf size $count2\n";
+    if (defined($self->{patron})) {
+      ($self->{patron} eq $for_patron) or return 0;
+      return ($count ? 0 : 1);
+    } else {	# not checked out
+      ($count2) and return $self->barcode_is_borrowernumber($for_patron, $self->{hold_shelf}[0]->{borrowernumber});
+    }
+    return 0;
 }
 
 sub _barcode_to_borrowernumber ($) {

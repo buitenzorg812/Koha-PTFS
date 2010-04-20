@@ -1,0 +1,49 @@
+<acsconfig xmlns="http://openncip.org/acs-config/1.0/">
+<!-- above address gets nothing, it's just a namespace -->
+  <error-detect enabled="true" />
+
+<!-- Set Net::Server::PreFork runtime parameters -->
+<!--  <server-params
+           min_servers='1'
+           min_spare_servers='0' /> -->
+  
+  <listeners>
+<!-- vestigial HTTP, never implemented: just use the OPAC!
+	<service
+      port="0:8080/tcp"
+      transport="http"
+      protocol="NCIP/1.0" />
+-->
+    <service
+      port="8023/tcp"
+      transport="telnet"
+      protocol="SIP/2.00"
+      timeout="60" />
+
+    <service
+      port="127.0.0.1:6001/tcp"
+      transport="RAW" 
+      protocol="SIP/2.00"
+      timeout="60" />
+  </listeners>
+
+  <accounts>
+      <login id="sipuser"  password="sipuser" delimiter="|" error-detect="enabled" institution="BHPL" />
+  </accounts>
+
+<!--
+Institution tags are for enabled branches.  There needs to be one
+institution stanza for each institution named in the accounts above.
+The implementation attribute is actually used to find the code to run,
+in our case "ILS".
+-->
+
+<institutions>
+    <institution id="BHPL" implementation="ILS" parms="">
+          <policy checkin="true" renewal="true" checkout="true"
+	  	  status_update="false" offline="false"
+		  timeout="100"
+	  	  retries="5" />
+    </institution>
+</institutions>
+</acsconfig>

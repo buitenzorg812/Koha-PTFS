@@ -56,50 +56,49 @@ use C4::Context;
 # 
 # Configuration parameters to run the test suite
 #
-our $instid   = 'CPL';  # branchcode
-our $instid2  = 'FPL';  # branchcode
+our $instid   = 'BHPL';	# 'UWOLS';
 our $currency = 'USD';	# 'CAD';
 our $server   = 'localhost:6001'; 	# Address of the SIP server
 
-# SIP username and password to connect to the server.
-# See SIPconfig.xml for the correct values.
-our $username = 'term1';
-our $password = 'term1';
+# SIP username and password to connect to the server.  See the
+# SIP config.xml for the correct values.
+our $username = 'sipuser';
+our $password = 'sipuser';
 
 # ILS Information
 
 # NOTE: make sure to escape the data for use in RegExp.
 # Valid user barcode and corresponding user password/pin and full name
-our $user_barcode = '23529001000463';
-our $user_pin     = 'fn5zS';
-our $user_fullname= 'Edna Acosta';
-our $user_homeaddr= '7896 Library Rd\.';
-our $user_email   = 'patron\@liblime\.com';
-our $user_phone   = '\(212\) 555-1212';
-our $user_birthday= '19800424';   # YYYYMMDD, ANSI X3.30
-our $user_ptype   = 'PT';
+our $user_barcode = '237774';
+our $user_pin     = 'dlb';
+our $user_fullname= 'David Birmingham';
+our $user_homeaddr= '2562 W\. Boss Arnold Road';
+our $user_email   = 'dbirmingham\@ptfs\.com';
+our $user_phone   = '\(301\) 834-5308';
+our $user_birthday= '19700603';
+our $user_ptype   = 'ADULT';
 our $user_inet    = 'Y';
 
 # Another valid user
-our $user2_barcode = '23529000240482';
-our $user2_pin     = 'jw937';
-our $user2_fullname= 'Jamie White';
-our $user2_homeaddr= '937 Library Rd\.';
-our $user2_email   = 'patron\@liblime\.com';
-our $user2_phone   = '\(212\) 555-1212';
-our $user2_birthday= '19500422';    # YYYYMMDD, ANSI X3.30
-our $user2_ptype   = 'T';
+our $user2_barcode = '237775';
+our $user2_pin     = 'akb';
+our $user2_fullname= 'Alison Birmingham';
+our $user2_homeaddr= '2562 W\. Boss Arnold Road';
+our $user2_email   = 'dbirmingham\@ptfs\.com';
+our $user2_phone   = '\(301\) 834-5308';
+our $user2_birthday= '19671123';
+our $user2_ptype   = 'ADULT';
 our $user2_inet    = 'Y';
 
 # Valid item barcode and corresponding title
-our $item_barcode = '502326000005';
-our $item_title   = 'How I became a pirate /';
-our $item_owner   = 'CPL';
+our $item_barcode = '73002';
+our $item_title   = 'The Dilbert future :';
+our $item_owner   = 'BHPL';
 
 # Another valid item
-our $item2_barcode = '502326000011';
-our $item2_title   = 'The biggest, smallest, fastest, tallest things you\'ve ever heard of /';
-our $item2_owner   = 'CPL';
+our $item2_barcode = '73003';
+our $item2_title   = 'A New England fish tale : /';
+our $item2_owner   = 'BHPL';
 
 # A third valid item
 our $item3_barcode = '502326000240';
@@ -107,9 +106,9 @@ our $item3_title   = 'The girl who owned a city /';
 our $item3_owner   = 'FPL';
 
 # An item with a diacritical in the title
-our $item_diacritic_barcode = '502326001030';
-our $item_diacritic_titlea  = 'Hari Poṭer u-geviʻa ha-esh /';
-our $item_diacritic_owner   = 'CPL';
+# our $item_diacritic_barcode = '502326001030';
+# our $item_diacritic_titlea  = 'Hari Poṭer u-geviʻa ha-esh /';
+# our $item_diacritic_owner   = 'BHPL';
 
 # End configuration
 

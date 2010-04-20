@@ -124,6 +124,7 @@ warn 'found ' . scalar( @$upcoming_dues ) . ' issues' if $verbose;
 # for patrons wishing digests only.
 my $upcoming_digest;
 my $due_digest;
+my @Ttitems;
 
 my $dbh = C4::Context->dbh();
 my $sth = $dbh->prepare(<<'END_SQL');
@@ -199,6 +200,11 @@ UPCOMINGITEM: foreach my $upcoming ( @$upcoming_dues ) {
                                       biblionumber   => $biblio->{'biblionumber'},
                                       substitute     => { 'items.content' => $titles }
                                     } );
+            $upcoming->{'title'} = $biblio->{'title'};
+            push @Ttitems,$upcoming;
+            if ($letter) {
+              C4::Letters::CreateTALKINGtechMESSAGE($upcoming->{'borrowernumber'},\@Ttitems,$letter_type,'0');
+            }
         }
     }
 

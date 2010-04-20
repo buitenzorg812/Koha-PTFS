@@ -395,7 +395,9 @@ END_SQL
                 $sth2->execute( ($listall) ? ( $borrowernumber , 1 , $MAX ) : ( $borrowernumber, $mindays, $maxdays ) );
                 my $itemcount = 0;
                 my $titles = "";
+                my @Ttitems;
                 while ( my $item_info = $sth2->fetchrow_hashref() ) {
+                    push @Ttitems, $item_info;
                     my @item_info = map { $_ =~ /^date|date$/ ? format_date( $item_info->{$_} ) : $item_info->{$_} || '' } @item_content_fields;
                     $titles .= join("\t", @item_info) . "\n";
                     $itemcount++;
@@ -438,6 +440,7 @@ END_SQL
                             outputformat   => defined $csvfilename ? 'csv' : '',
                         }
                       );
+                      C4::Letters::CreateTALKINGtechMESSAGE($borrowernumber,\@Ttitems,$overdue_rules->{"letter$i"},$i);
                 } else {
                     if ($email) {
                         C4::Letters::EnqueueLetter(

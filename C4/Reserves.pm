@@ -1559,6 +1559,14 @@ sub _koha_notify_reserve {
             }
         );
     }
+
+    my $biblio = &GetBiblioData($biblionumber);
+    my $item = &GetItem($itemnumber);
+    my @items;
+    $item->{'title'} = $biblio->{'title'};
+    push @items,$item;
+    C4::Letters::CreateTALKINGtechMESSAGE($borrowernumber,\@items,$messagingprefs->{'letter_code'},'0');
+
 }
 
 =item _ShiftPriorityByDateAndPriority
